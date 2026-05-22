@@ -82,6 +82,7 @@ final class ContentAINode extends AbstractNode
                 contentType: $contentType,
                 workflowName: $workflowName,
                 promptVersion: $prompt->getVersion(),
+                promptSource: $prompt->getSource(),
                 language: $rendered->language,
                 costUsd: $costUsd,
                 tokens: $tokens,
@@ -268,6 +269,7 @@ final class ContentAINode extends AbstractNode
         string $contentType,
         string $workflowName,
         string $promptVersion,
+        string $promptSource,
         string $language,
         float $costUsd,
         int $tokens,
@@ -293,7 +295,7 @@ final class ContentAINode extends AbstractNode
             ->with('prompt', [
                 'identifier' => $this->promptIdentifier,
                 'version' => $promptVersion,
-                'source' => $this->source,
+                'source' => $promptSource,
             ])
             ->record();
     }

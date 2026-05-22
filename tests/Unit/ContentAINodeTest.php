@@ -61,5 +61,6 @@ final class ContentAINodeTest extends TestCase
         $this->assertSame('prompt.executed', $events[0]->eventType->value);
         $this->assertSame('article', $events[0]->data['content_type']);
         $this->assertSame('article/research', $events[0]->data['prompt']['identifier']);
+        $this->assertSame('test', $events[0]->data['prompt']['source']);
     }
 }
