@@ -70,6 +70,34 @@ The node:
 - stores the raw response under `{outputKey}_response`
 - records tracking and pricing metadata when configured
 
+## Raw Prompt Iteration
+
+When you are designing a prompt and do not want to create JSON files yet, use `ContentAINode::rawPrompt()`.
+
+```php
+$workflow = WorkflowBuilder::named('raw-draft')
+    ->addNode('draft', ContentAINode::rawPrompt(
+        prompt: 'Write a compact article about {{topic}} for {{audience}}.',
+        systemPrompt: 'You are an expert editor testing a new prompt.',
+        identifier: 'runtime/article-draft-experiment',
+        outputKey: 'content',
+        source: 'runtime',
+        temperature: 0.35,
+        maxTokens: 700,
+    ))
+    ->build();
+```
+
+Raw prompts:
+
+- render variables from the workflow context
+- do not require `PromptRegistry`
+- are tracked as normal prompt executions
+- use `version: 0.0.0` by default
+- should use `source: runtime` or another explicit non-package source
+
+Once the prompt stabilizes, move it into `resources/prompts/...` and use a versioned `ContentAINode`.
+
 ## Language
 
 ```php

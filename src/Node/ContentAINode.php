@@ -15,6 +15,9 @@ use Token27\NexusAI\Pricing\Contract\PricingEngineInterface;
 use Token27\NexusAI\Pricing\Contract\PricingResultInterface;
 use Token27\NexusAI\Pricing\Exception\EstimationNotAvailableException;
 use Token27\NexusAI\Prompts\Contract\PromptRegistryInterface;
+use Token27\NexusAI\Prompts\Engine\MustacheAdapter;
+use Token27\NexusAI\Prompts\ValueObject\PromptMetadata;
+use Token27\NexusAI\Prompts\ValueObject\RenderedPrompt;
 use Token27\NexusAI\Request\StructuredRequest;
 use Token27\NexusAI\Request\TextRequest;
 use Token27\NexusAI\Response\StructuredResponse;
@@ -40,8 +43,44 @@ final class ContentAINode extends AbstractNode
         private readonly ?float $temperature = null,
         private readonly ?int $maxTokens = null,
         ?string $description = null,
+        private readonly ?string $rawPrompt = null,
+        private readonly ?string $rawSystemPrompt = null,
+        private readonly string $rawVersion = '0.0.0',
+        private readonly string $rawSource = 'runtime',
     ) {
         parent::__construct($description);
+    }
+
+    public static function rawPrompt(
+        string $prompt,
+        ?string $systemPrompt = null,
+        string $identifier = 'runtime/raw',
+        string $outputKey = 'output',
+        ?string $provider = null,
+        ?string $model = null,
+        ?string $language = null,
+        string $source = 'runtime',
+        string $version = '0.0.0',
+        ?string $outputClass = null,
+        ?float $temperature = null,
+        ?int $maxTokens = null,
+        ?string $description = null,
+    ): self {
+        return new self(
+            promptIdentifier: $identifier,
+            outputKey: $outputKey,
+            provider: $provider,
+            model: $model,
+            language: $language,
+            outputClass: $outputClass,
+            temperature: $temperature,
+            maxTokens: $maxTokens,
+            description: $description,
+            rawPrompt: $prompt,
+            rawSystemPrompt: $systemPrompt,
+            rawVersion: $version,
+            rawSource: $source,
+        );
     }
 
     public function execute(WorkflowContextInterface $context): StepResult
@@ -55,11 +94,16 @@ final class ContentAINode extends AbstractNode
         $language = $this->language ?? $this->nullableString($context->get('_content_language'));
 
         try {
-            $registry = $this->resolvePromptRegistry($context);
-            $prompt = $registry->resolve($this->promptIdentifier, $this->promptVersion, $language, $this->source);
-            $rendered = $prompt->render($context->all());
+            $promptIdentifier = $this->promptIdentifier;
+            $promptVersion = $this->promptVersion ?? 'latest';
+            $promptSource = $this->source ?? 'unknown';
+            $rendered = $this->rawPrompt !== null
+                ? $this->renderRawPrompt($context, $language)
+                : $this->renderVersionedPrompt($context, $language, $promptVersion, $promptSource);
             $systemPrompt = $rendered->getSystemMessage();
             $promptText = $rendered->getUserMessage() ?? $rendered->asPlainString();
+            $promptVersion = $rendered->version;
+            $promptSource = $rendered->source;
 
             $this->enforceBudget($context, $promptText, $model);
 
@@ -81,8 +125,9 @@ final class ContentAINode extends AbstractNode
                 model: $model,
                 contentType: $contentType,
                 workflowName: $workflowName,
-                promptVersion: $prompt->getVersion(),
-                promptSource: $prompt->getSource(),
+                promptIdentifier: $promptIdentifier,
+                promptVersion: $promptVersion,
+                promptSource: $promptSource,
                 language: $rendered->language,
                 costUsd: $costUsd,
                 tokens: $tokens,
@@ -95,8 +140,9 @@ final class ContentAINode extends AbstractNode
                 metadata: [
                     'provider' => $provider,
                     'model' => $model,
-                    'promptIdentifier' => $this->promptIdentifier,
-                    'promptVersion' => $prompt->getVersion(),
+                    'promptIdentifier' => $promptIdentifier,
+                    'promptVersion' => $promptVersion,
+                    'promptSource' => $promptSource,
                     'outputKey' => $this->outputKey,
                     'tokens' => $tokens,
                     'cost_usd' => $costUsd,
@@ -133,6 +179,53 @@ final class ContentAINode extends AbstractNode
     public function getType(): NodeType
     {
         return NodeType::AI;
+    }
+
+    private function renderVersionedPrompt(
+        WorkflowContextInterface $context,
+        ?string $language,
+        string &$promptVersion,
+        string &$promptSource,
+    ): RenderedPrompt {
+        $registry = $this->resolvePromptRegistry($context);
+        $prompt = $registry->resolve($this->promptIdentifier, $this->promptVersion, $language, $this->source);
+
+        $promptVersion = $prompt->getVersion();
+        $promptSource = $prompt->getSource();
+
+        return $prompt->render($context->all());
+    }
+
+    private function renderRawPrompt(WorkflowContextInterface $context, ?string $language): RenderedPrompt
+    {
+        $engine = new MustacheAdapter();
+        $blocks = [];
+
+        if ($this->rawSystemPrompt !== null && $this->rawSystemPrompt !== '') {
+            $blocks[] = [
+                'role' => 'system',
+                'content' => $engine->render($this->rawSystemPrompt, $context->all()),
+            ];
+        }
+
+        $blocks[] = [
+            'role' => 'user',
+            'content' => $engine->render((string) $this->rawPrompt, $context->all()),
+        ];
+
+        $resolvedLanguage = $language ?? 'en';
+
+        return new RenderedPrompt(
+            blocks: $blocks,
+            metadata: new PromptMetadata(
+                version: $this->rawVersion,
+                promptType: 'raw',
+                language: $resolvedLanguage,
+            ),
+            language: $resolvedLanguage,
+            version: $this->rawVersion,
+            source: $this->rawSource,
+        );
     }
 
     private function callDriver(
@@ -268,6 +361,7 @@ final class ContentAINode extends AbstractNode
         string $model,
         string $contentType,
         string $workflowName,
+        string $promptIdentifier,
         string $promptVersion,
         string $promptSource,
         string $language,
@@ -293,7 +387,7 @@ final class ContentAINode extends AbstractNode
             ->withLatencyMs($elapsedMs)
             ->with('type', 'content.llm_call')
             ->with('prompt', [
-                'identifier' => $this->promptIdentifier,
+                'identifier' => $promptIdentifier,
                 'version' => $promptVersion,
                 'source' => $promptSource,
             ])

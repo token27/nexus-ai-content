@@ -103,6 +103,7 @@ See:
 - `examples/01-anthropic-outline.php`
 - `examples/02-gemini-spanish.php`
 - `examples/03-deepseek-budget.php`
+- `examples/07-openai-raw-prompt.php`
 
 ---
 

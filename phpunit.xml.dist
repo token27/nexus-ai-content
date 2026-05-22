@@ -13,7 +13,8 @@
         </testsuite>
     </testsuites>
 
-    <source>
+    <source ignoreDirectDeprecations="true"
+            ignoreIndirectDeprecations="true">
         <include>
             <directory>src</directory>
         </include>

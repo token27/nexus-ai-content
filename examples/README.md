@@ -18,5 +18,6 @@ php examples\00-openai-draft.php
 | `04-tracking-jsonfile.php` | JSONL tracking store and how to inspect recorded events |
 | `05-custom-openai-compatible.php` | Custom OpenAI-compatible provider using `NexusAI::registerDriver()` |
 | `06-testing-fake-driver.php` | Local testing with `FakeDriver`, no network |
+| `07-openai-raw-prompt.php` | OpenAI workflow using an inline raw prompt for fast prompt iteration |
 
 The production examples share `_common.php`, which loads `.env`, configures `NexusAI`, creates the prompt registry, creates a pricing engine, and prints result summaries.

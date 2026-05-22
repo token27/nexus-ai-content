@@ -63,4 +63,50 @@ final class ContentAINodeTest extends TestCase
         $this->assertSame('article/research', $events[0]->data['prompt']['identifier']);
         $this->assertSame('test', $events[0]->data['prompt']['source']);
     }
+
+    public function test_raw_prompt_node_does_not_require_prompt_registry(): void
+    {
+        $fakeDriver = new FakeDriver();
+        $fakeDriver->willReturn(new TextResponse(
+            text: 'Raw prompt generated text',
+            finishReason: FinishReason::Stop,
+        ));
+
+        $trackingStore = new InMemoryExecutionStore();
+
+        $workflow = WorkflowBuilder::named('raw-draft')
+            ->addNode('draft', ContentAINode::rawPrompt(
+                prompt: 'Write a short note about {{topic}} for {{audience}}.',
+                systemPrompt: 'You are testing raw prompts.',
+                identifier: 'runtime/draft-experiment',
+                outputKey: 'content',
+                language: 'en',
+                source: 'runtime',
+                temperature: 0.1,
+            ))
+            ->build();
+
+        $engine = ContentEngine::create()
+            ->withTracking(TrackingEngine::withStore($trackingStore));
+        $engine->getRegistry()->register('article', $workflow);
+
+        $result = $engine
+            ->for('openai', 'gpt-4o-mini')
+            ->withContentType('article')
+            ->withDriver($fakeDriver)
+            ->withRunId('run-raw-content-ai')
+            ->withVariable('topic', 'prompt iteration')
+            ->withVariable('audience', 'editors')
+            ->generate();
+
+        $this->assertSame('Raw prompt generated text', $result->text);
+        $fakeDriver->assertRequestCount(1);
+        $fakeDriver->assertPromptContains('Write a short note about prompt iteration for editors.');
+
+        $events = $trackingStore->findByRun('run-raw-content-ai');
+        $this->assertCount(1, $events);
+        $this->assertSame('runtime/draft-experiment', $events[0]->data['prompt']['identifier']);
+        $this->assertSame('0.0.0', $events[0]->data['prompt']['version']);
+        $this->assertSame('runtime', $events[0]->data['prompt']['source']);
+    }
 }

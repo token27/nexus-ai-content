@@ -113,6 +113,7 @@ The `examples/` directory contains runnable production-style examples that read 
 - [04-tracking-jsonfile.php](examples/04-tracking-jsonfile.php)
 - [05-custom-openai-compatible.php](examples/05-custom-openai-compatible.php)
 - [06-testing-fake-driver.php](examples/06-testing-fake-driver.php)
+- [07-openai-raw-prompt.php](examples/07-openai-raw-prompt.php)
 
 ## Quality Gates
 
