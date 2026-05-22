@@ -27,6 +27,9 @@ use Token27\NexusAI\Tracking\Engine\TrackingEngine;
 use Token27\NexusAI\Workflows\Contract\WorkflowInterface;
 use Token27\NexusAI\Workflows\Engine\WorkflowBuilder;
 
+const EXAMPLE_PROMPT_SOURCE = 'token27/nexus-ai-content';
+const EXAMPLE_DRAFT_PROMPT_IDENTIFIER = 'content/draft';
+
 loadDotEnvIfPresent();
 
 function loadDotEnvIfPresent(): void
@@ -145,7 +148,7 @@ function makePromptRegistry(string $defaultLanguage = 'en'): PromptRegistry
         fallbackLanguage: 'en',
     );
 
-    $registry->autoloadFrom(__DIR__, 'nexus-ai-content/examples');
+    $registry->autoloadFrom(__DIR__, EXAMPLE_PROMPT_SOURCE);
 
     return $registry;
 }
@@ -177,7 +180,7 @@ function makeContentEngine(
         ->withTracking($tracking);
 }
 
-function draftWorkflow(string $prompt = 'content/draft', string $version = '1.0.0'): WorkflowInterface
+function draftWorkflow(string $prompt = EXAMPLE_DRAFT_PROMPT_IDENTIFIER, string $version = '1.0.0'): WorkflowInterface
 {
     return WorkflowBuilder::named('draft')
         ->addNode('draft', new ContentAINode(

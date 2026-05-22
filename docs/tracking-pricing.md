@@ -34,6 +34,16 @@ Read events:
 $events = $tracking->findByRun($runId);
 ```
 
+Query by prompt:
+
+```php
+$events = $tracking
+    ->query()
+    ->withData('prompt.identifier', 'content/draft')
+    ->withData('prompt.source', 'token27/nexus-ai-content')
+    ->search();
+```
+
 ## Pricing
 
 Use `nexus-ai-pricing`:

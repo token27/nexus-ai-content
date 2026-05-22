@@ -15,6 +15,14 @@ Identifier:
 content/draft
 ```
 
+Source:
+
+```text
+token27/nexus-ai-content
+```
+
+`identifier` points to the prompt namespace/type. `source` points to the package or registered origin that provides that prompt. For a normal Composer package, prefer the full package name (`vendor/package`) so tracking queries can filter by package.
+
 ## Prompt Example
 
 ```json

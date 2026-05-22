@@ -37,6 +37,23 @@ try {
         echo '- ' . $event->eventType->value . ' ' . json_encode($event->data, JSON_UNESCAPED_SLASHES) . PHP_EOL;
     }
 
+    $matchingPromptEvents = $tracking
+        ->query()
+        ->withData('prompt.identifier', EXAMPLE_DRAFT_PROMPT_IDENTIFIER)
+        ->withData('prompt.source', EXAMPLE_PROMPT_SOURCE)
+        ->search(limit: 5);
+
+    echo PHP_EOL . 'Query by prompt.identifier + prompt.source:' . PHP_EOL;
+    echo '  identifier: ' . EXAMPLE_DRAFT_PROMPT_IDENTIFIER . PHP_EOL;
+    echo '  source: ' . EXAMPLE_PROMPT_SOURCE . PHP_EOL;
+    echo '  matches: ' . count($matchingPromptEvents) . PHP_EOL;
+
+    $lastEvent = $matchingPromptEvents[0] ?? null;
+    if ($lastEvent !== null) {
+        echo '  first match run: ' . $lastEvent->runId . PHP_EOL;
+        echo '  first match prompt: ' . json_encode($lastEvent->data['prompt'] ?? [], JSON_UNESCAPED_SLASHES) . PHP_EOL;
+    }
+
     echo PHP_EOL . 'Tracking path: ' . $trackingPath . PHP_EOL;
 } catch (Throwable $e) {
     echo 'Error: ' . $e->getMessage() . PHP_EOL;
