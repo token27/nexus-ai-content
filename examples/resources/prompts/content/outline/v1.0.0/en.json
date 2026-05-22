@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "prompt_type": "content-outline",
+    "language": "en"
+  },
+  "blocks": [
+    {
+      "role": "system",
+      "content": "You are an editorial planner. Create clear outlines that can be expanded by later workflow steps."
+    },
+    {
+      "role": "user",
+      "content": "Create an article outline about {{topic}} for {{audience}}. Return a working title, search intent, five section headings, and one sentence describing each section."
+    }
+  ],
+  "variables": {
+    "topic": {
+      "type": "string",
+      "required": true
+    },
+    "audience": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

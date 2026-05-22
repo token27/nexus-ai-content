@@ -1,0 +1,10 @@
+/vendor/
+composer.lock
+.env
+examples/.env
+examples/var/
+.phpunit.cache/
+.php-cs-fixer.cache
+.phpstan.cache/
+build/
+coverage/

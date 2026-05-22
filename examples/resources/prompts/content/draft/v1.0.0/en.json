@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "prompt_type": "content-draft",
+    "language": "en"
+  },
+  "blocks": [
+    {
+      "role": "system",
+      "content": "You are a senior content strategist. Write helpful, accurate, non-spammy content with a practical editorial tone."
+    },
+    {
+      "role": "user",
+      "content": "Write a compact article draft about {{topic}} for {{audience}}. Include a title, a short introduction, three useful sections, and a concise closing."
+    }
+  ],
+  "variables": {
+    "topic": {
+      "type": "string",
+      "required": true
+    },
+    "audience": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

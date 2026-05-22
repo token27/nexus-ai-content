@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "prompt_type": "content-draft",
+    "language": "es"
+  },
+  "blocks": [
+    {
+      "role": "system",
+      "content": "Eres un estratega senior de contenidos. Escribe contenido util, preciso y no spam, con tono editorial practico."
+    },
+    {
+      "role": "user",
+      "content": "Escribe un borrador compacto de articulo sobre {{topic}} para {{audience}}. Incluye titulo, introduccion breve, tres secciones utiles y un cierre conciso."
+    }
+  ],
+  "variables": {
+    "topic": {
+      "type": "string",
+      "required": true
+    },
+    "audience": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

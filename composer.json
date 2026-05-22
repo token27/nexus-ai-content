@@ -1,0 +1,56 @@
+{
+  "name": "token27/nexus-ai-content",
+  "description": "Generic content orchestration layer for NexusAI workflows, prompts, tracking, pricing, and domain extensions.",
+  "type": "library",
+  "homepage": "https://github.com/token27/nexus-ai-content",
+  "license": "MIT",
+  "require": {
+    "php": "^8.3",
+    "token27/nexus-ai": "^1.0",
+    "token27/nexus-ai-prompts": "^1.0",
+    "token27/nexus-ai-tracking": "^1.0",
+    "token27/nexus-ai-pricing": "^1.0",
+    "token27/nexus-ai-workflows": "^1.0"
+  },
+  "suggest": {
+    "token27/nexus-ai-tokenizer": "Optional tokenizer support for pre-request token estimation through a configured nexus-ai-pricing engine.",
+    "token27/nexus-ai-images": "Use from content domain extensions when a workflow needs generated images.",
+    "token27/nexus-ai-content-formatters": "Use at the publication/export boundary to format generated structured content."
+  },
+  "autoload": {
+    "psr-4": {
+      "Token27\\NexusAI\\Content\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Token27\\NexusAI\\Content\\Tests\\": "tests/"
+    }
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.0",
+    "guzzlehttp/guzzle": "^7.0",
+    "nyholm/psr7": "^1.8",
+    "phpstan/phpstan": "^2.0",
+    "phpunit/phpunit": "^11.0",
+    "psr/http-client": "^1.0",
+    "psr/http-factory": "^1.0"
+  },
+  "scripts": {
+    "test": "phpunit",
+    "test:unit": "phpunit --testsuite Unit",
+    "lint": "php-cs-fixer fix --dry-run --diff",
+    "lint-fix": "php-cs-fixer fix",
+    "analyse": "phpstan analyse --level=8 src/ tests/",
+    "check": [
+      "@lint",
+      "@analyse",
+      "@test"
+    ]
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

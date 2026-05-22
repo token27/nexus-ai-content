@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  quality:
+    name: PHP ${{ matrix.php }} — Quality
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.3', '8.4', '8.5']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install dependencies
+        run: composer install --no-progress --no-interaction
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse src/ tests/ --level=8 --no-progress
+
+      - name: PHPUnit
+        run: vendor/bin/phpunit tests/Unit/ --colors=always
+
+      - name: Check code style
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff --ansi
